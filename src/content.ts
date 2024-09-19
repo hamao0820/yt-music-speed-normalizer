@@ -51,13 +51,8 @@ const initSettingsPopup = () => {
 
 // checkIfMusic は現在開いている動画が音楽かどうかを判定します。
 const checkIfMusic = (): boolean => {
-  const title = document.querySelector("yt-formatted-string#title");
-  if (!title) {
-    console.log("title not found");
-    return false;
-  }
-  const titleText = title.textContent;
-  return titleText === "音楽";
+  const titles = document.querySelectorAll("yt-formatted-string#title");
+  return Array.from(titles).some((title) => title.textContent === "音楽");
 };
 
 // checkIfAdvertisement は現在の動画が広告かどうかを判定します。
