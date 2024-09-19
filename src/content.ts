@@ -1,4 +1,4 @@
-export {};
+import { ChromeMessage } from "./type";
 
 const sleep = (ms: number): Promise<number> => {
   return new Promise<number>((resolve) => setTimeout(resolve, ms));
@@ -77,7 +77,6 @@ const setPlayRateNormalRate = () => {
     throw new Error("play rate setting menu item not found");
   }
   playRateSettingMenuItem.click();
-  console.log("play rate setting menu item is clicked");
 
   const playRateMenuItems = mustQuerySelectorAll(settingsPopup, ".ytp-menuitem");
   const normalPlayRateMenuItem = findItemByLabel(playRateMenuItems, "標準");
@@ -85,14 +84,11 @@ const setPlayRateNormalRate = () => {
     throw new Error("normal play rate menu item not found");
   }
   normalPlayRateMenuItem.click();
-  console.log("normal play rate menu item is clicked");
 };
 
 const main = async () => {
-  console.log("yt-music-speed-normalizer: main");
-
+  console.log("running yt-music-speed-normalizer...");
   const isMusic = await new Promise<boolean>(async (resolve) => {
-    console.log("waiting for ytd-watch-metadata");
     let summaryColumn: HTMLElement | null = null;
     while (true) {
       summaryColumn = document.querySelector("ytd-watch-metadata");
@@ -101,12 +97,11 @@ const main = async () => {
       }
       await sleep(100);
     }
-    console.log("ytd-watch-metadata is found");
     resolve(checkIfMusic());
   });
 
   if (!isMusic) {
-    console.log("not music");
+    console.log("this video is not music");
     return;
   }
 
@@ -114,7 +109,7 @@ const main = async () => {
 
   // 動画の再生が始まるまで待つ
   while (checkIfAdvertisement()) {
-    console.log("advertisement");
+    console.log("waiting for video to start...");
     await sleep(1000);
   }
 
@@ -122,4 +117,8 @@ const main = async () => {
   console.log("play rate is normalized");
 };
 
-window.addEventListener("load", main, false);
+chrome.runtime.onMessage.addListener((message: ChromeMessage, sender, sendResponse) => {
+  if (message.type === "run") {
+    main();
+  }
+});

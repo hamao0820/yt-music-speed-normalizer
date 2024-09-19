@@ -14,6 +14,10 @@ const manifest = defineManifest({
       all_frames: true,
     },
   ],
+  background: {
+    service_worker: "src/background.ts",
+  },
+  permissions: ["tabs"],
 });
 
 export default defineConfig({
