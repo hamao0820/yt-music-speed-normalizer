@@ -96,11 +96,21 @@ const setPlayRateNormalRate = () => {
 const main = async () => {
   console.log("yt-music-speed-normalizer: main");
 
-  console.log("wait 1 seconds");
-  await sleep(1000);
-  console.log("waited 1 seconds");
+  const isMusic = await new Promise<boolean>(async (resolve) => {
+    console.log("waiting for ytd-watch-metadata");
+    let summaryColumn: HTMLElement | null = null;
+    while (true) {
+      summaryColumn = document.querySelector("ytd-watch-metadata");
+      if (summaryColumn) {
+        break;
+      }
+      await sleep(100);
+    }
+    console.log("ytd-watch-metadata is found");
+    resolve(checkIfMusic());
+  });
 
-  if (!checkIfMusic()) {
+  if (!isMusic) {
     console.log("not music");
     return;
   }
