@@ -4,8 +4,8 @@ import { crx, defineManifest } from "@crxjs/vite-plugin";
 const manifest = defineManifest({
   manifest_version: 3,
   name: "yt-music-speed-normalizer",
-  version: "1.0.0",
-  description: "youtubeで音楽を再施する時は自動で再生速度を1倍にする拡張機能",
+  version: "1.0.1",
+  description: "YouTubeで音楽再生時に自動で再生速度を1倍に戻してくれるChrome拡張機能です。",
   content_scripts: [
     {
       matches: ["https://www.youtube.com/*"],
