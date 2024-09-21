@@ -1,5 +1,10 @@
 import { ChromeMessage } from "./type";
 
+// 日本語, English (US), 中文 (简体)
+const MusicWords = ["音楽", "Music", "音乐"];
+const PlaybackSpeedWords = ["再生速度", "Playback speed", "播放速度"];
+const NormalWords = ["標準", "Normal", "正常"];
+
 const sleep = (ms: number): Promise<number> => {
   return new Promise<number>((resolve) => setTimeout(resolve, ms));
 };
@@ -35,9 +40,26 @@ const hasLabel = (element: HTMLElement, text: string): boolean => {
   return mustQuerySelector(element, ".ytp-menuitem-label").textContent === text;
 };
 
+// hasSomeLabels は要素が指定したテキストのいずれかを持つかどうかを判定します。
+const hasSomeLabels = (element: HTMLElement, texts: string[]): boolean => {
+  return texts.some((text) => hasLabel(element, text));
+};
+
 // findItemByLabel はリストの中から指定したテキストを持つ要素を探します。
 const findItemByLabel = (items: NodeListOf<HTMLElement>, text: string): HTMLElement | undefined => {
   return Array.from(items).find((item) => hasLabel(item, text));
+};
+
+// findItemByLabels はリストの中から指定したテキストを持つ要素を探します。
+// 複数のテキストが指定された場合、最初に見つかった要素を返します。
+const findItemByLabels = (items: NodeListOf<HTMLElement>, texts: string[]): HTMLElement | undefined => {
+  for (const text of texts) {
+    const item = findItemByLabel(items, text);
+    if (item) {
+      return item;
+    }
+  }
+  return undefined;
 };
 
 // initSettingsPopup は設定用のポップアップを初期化します。
@@ -51,8 +73,14 @@ const initSettingsPopup = () => {
 
 // checkIfMusic は現在開いている動画が音楽かどうかを判定します。
 const checkIfMusic = (): boolean => {
-  const titles = document.querySelectorAll("yt-formatted-string#title");
-  return Array.from(titles).some((title) => title.textContent === "音楽");
+  const elms = document.querySelectorAll("yt-formatted-string#title");
+  return Array.from(elms).some((elm) => {
+    const textContent = elm.textContent;
+    if (!textContent) {
+      return false;
+    }
+    return MusicWords.some((word) => textContent.includes(word));
+  });
 };
 
 // checkIfAdvertisement は現在の動画が広告かどうかを判定します。
@@ -60,7 +88,7 @@ const checkIfAdvertisement = (): boolean => {
   try {
     const settingsPopup = mustQuerySelector(document, ".ytp-popup.ytp-settings-menu");
     const playRateSettingMenuItems = mustQuerySelectorAll(settingsPopup, ".ytp-menuitem");
-    return Array.from(playRateSettingMenuItems).every((item) => !hasLabel(item, "再生速度"));
+    return Array.from(playRateSettingMenuItems).every((item) => !hasSomeLabels(item, PlaybackSpeedWords));
   } catch (e) {
     console.error(e);
     return true;
@@ -72,14 +100,14 @@ const setPlayRateNormalRate = () => {
   const settingsPopup = mustQuerySelector(document, ".ytp-popup.ytp-settings-menu");
 
   const settingsMenuItems = mustQuerySelectorAll(settingsPopup, ".ytp-menuitem");
-  const playRateSettingMenuItem = findItemByLabel(settingsMenuItems, "再生速度");
+  const playRateSettingMenuItem = findItemByLabels(settingsMenuItems, PlaybackSpeedWords);
   if (!playRateSettingMenuItem) {
     throw new Error("play rate setting menu item not found");
   }
   playRateSettingMenuItem.click();
 
   const playRateMenuItems = mustQuerySelectorAll(settingsPopup, ".ytp-menuitem");
-  const normalPlayRateMenuItem = findItemByLabel(playRateMenuItems, "標準");
+  const normalPlayRateMenuItem = findItemByLabels(playRateMenuItems, NormalWords);
   if (!normalPlayRateMenuItem) {
     throw new Error("normal play rate menu item not found");
   }

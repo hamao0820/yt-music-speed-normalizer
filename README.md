@@ -1,6 +1,7 @@
 # yt-music-speed-normalizer
 
 This tool is designed for people who usually watch YouTube at altered playback speeds. It automatically switches back to the normal speed when music is played.
+If language setting is not "日本語", "English (US)" or "中文 (简体)", it may not work properly.
 
 ## build
 
