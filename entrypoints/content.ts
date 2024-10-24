@@ -129,6 +129,16 @@ export default defineContentScript({
           }
           await sleep(100);
         }
+
+        // 1秒間の間は音楽かどうかを確認する
+        for (let i = 0; i < 20; i++) {
+          if (checkIfMusic()) {
+            resolve(true);
+            return;
+          }
+          await sleep(50);
+        }
+
         resolve(checkIfMusic());
       });
 
