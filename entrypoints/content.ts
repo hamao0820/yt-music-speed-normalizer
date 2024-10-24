@@ -127,7 +127,7 @@ export default defineContentScript({
           if (summaryColumn) {
             break;
           }
-          await sleep(100);
+          await sleep(50);
         }
 
         // 1秒間の間は音楽かどうかを確認する
@@ -150,9 +150,9 @@ export default defineContentScript({
       initSettingsPopup();
 
       // 動画の再生が始まるまで待つ
+      console.log("waiting for video to start...");
       while (checkIfAdvertisement()) {
-        console.log("waiting for video to start...");
-        await sleep(1000);
+        await sleep(100);
       }
 
       setPlayRateNormalRate();
