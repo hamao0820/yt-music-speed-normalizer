@@ -17,7 +17,7 @@ export default defineConfig({
       {
         matches: ["https://www.youtube.com/*"],
         js: ["content-scripts/content.js"],
-        run_at: "document_end",
+        run_at: "document_start",
         all_frames: true,
       },
     ],
