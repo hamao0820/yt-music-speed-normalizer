@@ -6,7 +6,7 @@ If language setting is not "日本語", "English (US)" or "中文 (简体)", it 
 ## build
 
 ```bash
-yarn build
+bun run build
 ```
 
 ## how to use
