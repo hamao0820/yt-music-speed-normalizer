@@ -75,6 +75,40 @@ export default defineContentScript({
       settingsPopup.style.display = "none";
     };
 
+    // checkIfSummaryColumnUpdated は概要が更新されたかどうかを判定します。
+    const checkIfSummaryColumnUpdated = async (): Promise<boolean> => {
+      const summaryColumn = document.querySelector("ytd-watch-metadata");
+      if (!summaryColumn) {
+        return false;
+      }
+      const res: { data: boolean } = await chrome.runtime.sendMessage({
+        type: "check",
+        data: summaryColumn.textContent,
+      });
+      if (res.data === undefined) {
+        return false;
+      }
+      return res.data;
+    };
+
+    // saveSummaryColumn は概要を保存します。
+    const saveSummaryColumn = () => {
+      const summaryColumn = document.querySelector("ytd-watch-metadata");
+      if (!summaryColumn) {
+        console.error("summary column not found");
+        return;
+      }
+      chrome.runtime
+        .sendMessage({
+          type: "save",
+          data: summaryColumn.textContent,
+        })
+        .catch((e) => {
+          console.error(e);
+          return true;
+        });
+    };
+
     // checkIfMusic は現在開いている動画が音楽かどうかを判定します。
     const checkIfMusic = (): boolean => {
       const elms = document.querySelectorAll("yt-formatted-string#title");
@@ -121,10 +155,10 @@ export default defineContentScript({
     const main = async () => {
       console.log("running yt-music-speed-normalizer...");
       const isMusic = await new Promise<boolean>(async (resolve) => {
-        let summaryColumn: HTMLElement | null = null;
+        console.log("waiting for summary column to update...");
         while (true) {
-          summaryColumn = document.querySelector("ytd-watch-metadata");
-          if (summaryColumn) {
+          const isSummaryColumnUpdated = await checkIfSummaryColumnUpdated();
+          if (isSummaryColumnUpdated) {
             break;
           }
           await sleep(50);
@@ -157,6 +191,10 @@ export default defineContentScript({
 
       setPlayRateNormalRate();
       console.log("play rate is normalized");
+
+      setTimeout(() => {
+        saveSummaryColumn();
+      }, 1000);
     };
 
     chrome.runtime.onMessage.addListener(
@@ -169,6 +207,8 @@ export default defineContentScript({
       ) => {
         if (message.type === "run") {
           main();
+          sendResponse({ message: "running" });
+          return true;
         }
       }
     );
